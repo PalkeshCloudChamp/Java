@@ -2,3 +2,52 @@ Notes Regarding JPA:-
 
 
 JPA Stands for Java Persistence API, It is used to persist data between Java Object and the relational database.
+
+* To let the spring boot application know that the particular class is our entity, we have to give an annotation i.e. @Entity on our Entity class.
+An Entity is the pojo class of our database table, or can be said as the blueprint of our database table.
+
+
+<> To define the PRIMARY KEY  we just out @Id above the variable name.
+
+<> To give a different name to the table use the @Table annotation and in that, give the name value which you want to give to the table name.
+	Ex:- @Table(name=<Table-Name>)
+	     public class SomeTable{
+	     }
+
+<> To give the name to the column same as the table name, use the @Column annotation instead of @Table annotation.
+	Ex:- public class SomeTable{
+	     
+	     @Column(name=<new-name-to-column>)
+	     private <data-type> <variable-name>;
+	     
+    	     }
+
+
+* Repository in JPA:-
+Repository in JPA is the interfaces which have implemented different standard method to perform some operations for example CRUD operation and there are many more such kind of operation present in the table, so this kind of thing is already pre-built or implemented by JPA. We can use this operation methods with the help of java interface, we just have to extend the different interfaces as per the requirement, and starting using there pre-built methods.
+So to define a Repository we need to add the annotation to our interface which is @Repository.
+
+Syntax:-
+Lets say we are going to perform the CRUD operation, then we will extend the JpaRepository
+
+
+->	@Repository
+	public interface <Interface-Name> extends JpaRepository< <Entity-Name>, <ID-type> >{
+	// your custom things you want to define inside, something like custom queries that you want to fire on database.
+	}
+
+
+
+
+* To create the reference variable of your repository, use the private type (standard) and above that put the @Autowired annotation over it to get the fine-grained control and it also enables you to inject the object dependency implicitly.
+-> {
+	@Autowired
+	private <Repository-Name> <Repository-Object-Name>;
+   }
+
+
+
+
+
+
+

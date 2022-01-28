@@ -1,7 +1,14 @@
 package com.StudentCourseRepo.StudentApi;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,9 +24,16 @@ import com.StudentCourseRepo.Repository.StudentRepository;
 @RestController
 public class StudentController {
 	
+//	private EntityManager entityManager;
+//	CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+//	CriteriaQuery cq = cb.createQuery();
+	
+	@PersistenceContext
+	private EntityManager entityManager;
+	
 	@Autowired
 	private StudentRepository studentRepo;
-	private String baseDir = "C:\\blazeclan\\FormsExpress\\DB-testing\\Tables\\";
+	private String baseDir = "C:/blazeclan/FormsExpress/DB-testing/Tables/";
 	@GetMapping("/users")
 	public String getAllUsers() {
 		System.out.println(studentRepo.findAll());
@@ -32,14 +46,24 @@ public class StudentController {
 		return obj;
 	}
 	
-	@GetMapping("/user/{status}")
-	public void GetUserByStatus(@PathVariable("status") String status) {
+	@GetMapping("/user/{cid}")
+	public void GetUserByStatus(@PathVariable("cid") int cid) {
 		try {
-			studentRepo.getUserByStatus(status);
+			File dirObj = new File(baseDir+"/"+cid);
+			if(!dirObj.exists()) {
+				dirObj.mkdir();
+			}
+			studentRepo.getAllUserFromFeLocal(cid);
+			studentRepo.DeleteFeLocalData(cid);
 		} catch (Exception e) {
 			// TODO: handle exception
 			System.out.println(e);
 		}
+		
+		
+		
+		
+		
 //		
 //		List<Users> obj = studentRepo.getUserByStatus(status);
 //		try {
@@ -72,15 +96,50 @@ public class StudentController {
 //		return obj;
 	}
 	
-	@GetMapping("/restore/{status}")
-	public void RestoreData(@PathVariable("status") String Status) {
-		System.out.println("Status Value:- " + Status);
+	
+	@GetMapping("/delete/{cid}")
+	public void DeleteUserByStatus(@PathVariable("cid") int cid) {
 		try {
-			studentRepo.RestoreData(Status);
+			studentRepo.DeleteFeLocalData(cid);
 		} catch (Exception e) {
-			// TODO: handle exception
 			System.out.println(e);
 		}
+	}
+	
+
+	
+	@Transactional
+	@GetMapping("/restore/{cid}")
+	public void RestoreData(@PathVariable("cid") int cid) {
+		System.out.println("Status Value:- " + baseDir +cid);
+		String[] table_names = new String[]{
+				"payment_transaction","payment_method","user_account","user_additional_emails","cached_notice"
+				,"user_notices","email_log","account_logs","user_request_permission", "customer_request_permission","customer_notice_permission"
+				,"customer_product","customer_report","request",
+//				"user_sites_config_list_view",
+				"list_report","job_proof_details","job_xref_files"
+				,"job_xref_message",
+//				"job_xref_instruction",
+				"job_xref_extraction","job_xref_email","job_xref_proofs_specific","job_detail","enotices_job",
+				"enotices_document","email_job_queue","customer","user","payment_schedule","payment_history"
+		};
+		System.out.println(table_names.length);
+//		LOAD DATA INFILE 'C:/blazeclan/FormsExpress/DB-testing/Tables/Users/status' into table users fields terminated by ',';
+		String starting_of_query = "LOAD DATA INFILE ";
+		String end_of_query = " fields terminated by ',';";
+		for(String table : table_names) {
+			String table_file_path = baseDir+cid+"/"+table+".csv";
+			String final_query = starting_of_query+"'"+table_file_path+"' into table `fe-local`." + table+end_of_query;
+			System.out.println("Query for table "+table+":- "+final_query);
+			entityManager.createNativeQuery(final_query).executeUpdate();
+		}
+//		entityManager.createNativeQuery(baseDir);
+//		try {
+//			studentRepo.RestoreFeLocalData(cid);
+//		} catch (Exception e) {
+//			// TODO: handle exception
+//			System.out.println(e);
+//		}
 		
 	}
 	
@@ -100,4 +159,20 @@ public class StudentController {
 //		studentRepo.save(us);
 		System.out.println(us2);
 	}
+	
+	
+	
+	
+	
+//	Calling all the queries of fe-local database from here.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
